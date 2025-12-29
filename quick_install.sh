@@ -15,20 +15,14 @@ OS_TYPE=$(uname)
 echo "🔍 Detecting OS: $OS_TYPE"
 
 if [[ "$OS_TYPE" == "Darwin" ]]; then
-    echo "🍎 macOS detected. Ensuring Python3 is available..."
-    if ! command -v python3 &> /dev/null; then
-        echo "❌ Python3 not found. Please install via Homebrew or official installer."
-        exit 1
-    fi
+    echo "🍎 macOS detected..."
 elif [[ "$OS_TYPE" == "Linux" ]]; then
     if [ -f /etc/debian_version ]; then
         echo "🐧 Ubuntu/Debian detected. Installing dependencies..."
-        sudo apt update && sudo apt install -y python3-pip libespeak1 ffmpeg git python3-full python3-venv
+        sudo apt update && sudo apt install -y python3-pip libespeak1 ffmpeg git python3-venv python3-full
     elif [ -f /etc/redhat-release ]; then
         echo "🐧 CentOS/RHEL detected. Installing dependencies..."
         sudo yum install -y python3-pip espeak-ng ffmpeg git
-    else
-        echo "⚠️ Unknown Linux distribution. Proceeding anyway..."
     fi
 fi
 
@@ -44,18 +38,22 @@ else
     cd "$APP_DIR"
 fi
 
-# 3. Setup Virtual Environment (Recommended for modern Linux)
-echo "� Setting up Python Virtual Environment..."
-python3 -m venv venv
-source venv/bin/activate
+# 3. Setup Virtual Environment (Highly Recommended for PEP 668)
+echo "🐍 Setting up Python Virtual Environment..."
+# Ensure we clean up old venv if it's broken
+rm -rf venv
+python3 -m venv venv || { echo "❌ Failed to create venv. Is python3-venv installed?"; exit 1; }
 
 # 4. Setup Permissions
 chmod +x *.sh
 
 # 5. Install Python Dependencies
-echo "� Installing Python dependencies in venv..."
-pip install --upgrade pip
-pip install -r requirements.txt
+echo "📦 Installing Python dependencies in venv..."
+./venv/bin/python3 -m pip install --upgrade pip
+
+# We use --ignore-installed to prevent pip from trying to uninstall system-managed packages like 'blinker'
+echo "⚙️ Running isolated pip install..."
+./venv/bin/python3 -m pip install --ignore-installed -r requirements.txt
 
 # 6. Khởi tạo config nếu chưa có
 if [ ! -f "config.json" ]; then
