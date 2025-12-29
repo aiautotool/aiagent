@@ -1,0 +1,8 @@
+*.log
+*.pid
+*.aiff
+*.m4a
+*.wav
+*.mp3
+__pycache__/
+.DS_Store
