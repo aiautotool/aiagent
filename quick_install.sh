@@ -34,9 +34,10 @@ fi
 
 # 2. Clone/Update repository
 if [ -d "$APP_DIR" ]; then
-    echo "📂 Directory $APP_DIR already exists. Updating..."
+    echo "📂 Directory $APP_DIR already exists. Force updating..."
     cd "$APP_DIR"
-    git pull origin main
+    git fetch origin
+    git reset --hard origin/main
 else
     echo "📥 Cloning repository..."
     git clone "$REPO_URL" "$APP_DIR"
