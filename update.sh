@@ -5,10 +5,25 @@
 
 set -e
 
-APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Search for the application directory
+if [ -d "$HOME/aiagent" ]; then
+    APP_DIR="$HOME/aiagent"
+elif [ -d "/opt/aiagent" ]; then
+    APP_DIR="/opt/aiagent"
+else
+    # Fallback to current directory of the script if possible
+    APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null || pwd)"
+fi
+
+if [ ! -d "$APP_DIR/.git" ]; then
+    echo "❌ Lỗi: Không tìm thấy thư mục cài đặt AI Agent có chứa Git tại $APP_DIR"
+    echo "Hãy chắc chắn bạn đã cài đặt ứng dụng vào ~/aiagent"
+    exit 1
+fi
+
 cd "$APP_DIR"
 
-echo "🔄 Đang kiểm tra bản cập nhật mới nhất từ GitHub..."
+echo "🔄 Đang cập nhật AI Agent tại $APP_DIR..."
 
 # 1. Fetch and Reset to avoid local conflicts
 git fetch origin
