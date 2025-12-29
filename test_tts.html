@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI TTS Tester</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        textarea,
+        select,
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #0f172a;
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        .controls-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: none;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .audio-player {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        audio {
+            width: 100%;
+            filter: invert(100%) hue-rotate(180deg) brightness(1.5);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>AI Text-to-Speech</h1>
+
+        <div class="form-group">
+            <label for="text">Văn bản</label>
+            <textarea id="text"
+                placeholder="Nhập nội dung cần đọc tại đây...">Xin chào, tôi là trợ lý AI. Rất vui được hỗ trợ bạn.</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="engine">Công cụ TTS (Engine)</label>
+            <select id="engine">
+                <option value="native">Native (Hệ thống - Offline)</option>
+                <option value="gtts">Google gTTS (Trực tuyến - Online)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="voice">Giọng đọc (Chỉ cho Native)</label>
+            <select id="voice">
+                <option value="">Đang tải danh sách giọng...</option>
+            </select>
+        </div>
+
+        <div class="controls-row">
+            <div class="form-group">
+                <label for="rate">Tốc độ (Rate)</label>
+                <input type="number" id="rate" value="180" step="10">
+            </div>
+            <div class="form-group">
+                <label for="volume">Âm lượng (0-1)</label>
+                <input type="number" id="volume" value="1.0" min="0" max="1" step="0.1">
+            </div>
+        </div>
+
+        <button id="speakBtn">Phát âm thanh</button>
+
+        <div id="status">Sẵn sàng</div>
+
+        <div class="audio-player" id="playerCont">
+            <audio id="audioPlayer" controls></audio>
+            <a id="downloadBtn" href="#"
+                style="display: block; text-align: center; margin-top: 0.5rem; color: var(--primary); text-decoration: none; font-size: 0.8rem;">Tải
+                xuống file (.wav)</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        const engineSelect = document.getElementById('engine');
+        const voiceSelect = document.getElementById('voice');
+        const speakBtn = document.getElementById('speakBtn');
+        const status = document.getElementById('status');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playerCont = document.getElementById('playerCont');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // Load voices
+        async function loadVoices() {
+            try {
+                const res = await fetch(`${API_BASE}/api/voices`);
+                const data = await res.json();
+                if (data.success) {
+                    voiceSelect.innerHTML = '';
+                    // Sort to put Vietnamese voices first
+                    const sortedVoices = data.voices.sort((a, b) => {
+                        const aIsVi = a.languages.some(l => l.includes('vi'));
+                        const bIsVi = b.languages.some(l => l.includes('vi'));
+                        return bIsVi - aIsVi;
+                    });
+
+                    sortedVoices.forEach(v => {
+                        const opt = document.createElement('option');
+                        opt.value = v.id;
+                        opt.textContent = `${v.name} (${v.languages.join(', ')})`;
+                        voiceSelect.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                status.textContent = 'Không thể kết nối đến API server.';
+            }
+        }
+
+        audioPlayer.onerror = () => {
+            status.textContent = 'Lỗi trình phát audio: Định dạng không được hỗ trợ hoặc file lỗi.';
+            console.error('Audio error:', audioPlayer.error);
+        };
+
+        speakBtn.onclick = async () => {
+            const text = document.getElementById('text').value;
+            const voice_id = voiceSelect.value;
+            const rate = document.getElementById('rate').value;
+            const volume = document.getElementById('volume').value;
+            const engine = engineSelect.value;
+
+            if (!text) return alert('Vui lòng nhập văn bản');
+
+            speakBtn.disabled = true;
+            status.textContent = 'Đang xử lý...';
+            playerCont.style.display = 'none';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/tts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, voice_id, rate, volume, engine })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    const audioSrc = `data:${data.mime_type};base64,${data.audio_base64}`;
+                    audioPlayer.src = audioSrc;
+                    playerCont.style.display = 'block';
+                    status.textContent = 'Đã tạo xong!';
+                    audioPlayer.play();
+
+                    // Download link
+                    downloadBtn.href = audioSrc;
+                    downloadBtn.download = `tts_output.${data.format}`;
+                } else {
+                    status.textContent = 'Lỗi: ' + data.error;
+                }
+            } catch (err) {
+                status.textContent = 'Lỗi kết nối API';
+            } finally {
+                speakBtn.disabled = false;
+            }
+        };
+
+        loadVoices();
+    </script>
+
+</body>
+
+</html>

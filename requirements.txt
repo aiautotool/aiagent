@@ -1,0 +1,6 @@
+flask
+requests
+openai
+pyttsx3
+gTTS
+flask-cors

@@ -1,0 +1,14 @@
+[Unit]
+Description=AI Agent Web API Service
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/opt/aiagent
+ExecStart=/usr/bin/python3 /opt/aiagent/ai_api.py
+Restart=always
+Environment=PYTHONPATH=/opt/aiagent
+
+[Install]
+WantedBy=multi-user.target
