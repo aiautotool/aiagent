@@ -2,7 +2,7 @@
 
 Dự án này cung cấp một API mạnh mẽ để tương tác với các mô hình AI (Gemini, Pollinations, v.v.) và tích hợp tính năng Chuyển đổi văn bản thành giọng nói (TTS) đa nền tảng.
 
-## 🚀 Cài đặt (Cách duy nhất)
+## 🚀 Cài đặt 
 
 Chạy lệnh duy nhất sau trên Terminal để tự động cài đặt toàn bộ hệ thống (Hỗ trợ **macOS, Ubuntu, CentOS**):
 
