@@ -140,17 +140,27 @@ def tts():
             print(f"Running MacOS native TTS: {' '.join(cmd)}")
             subprocess.run(cmd, check=True)
         else:
-            # Fallback for other OS
+            # Fallback for other OS (Linux/Windows)
             engine = pyttsx3.init()
             if voice_id:
-                engine.setProperty('voice', voice_id)
+                try:
+                    print(f"Attempting to set voice to: {voice_id}")
+                    engine.setProperty('voice', voice_id)
+                except Exception as ve:
+                    print(f"Warning: Failed to set voice {voice_id}: {ve}. Using default.")
+            
             if rate:
-                engine.setProperty('rate', int(rate))
+                try:
+                    engine.setProperty('rate', int(rate))
+                except: pass
             if volume:
-                engine.setProperty('volume', float(volume))
+                try:
+                    engine.setProperty('volume', float(volume))
+                except: pass
             
             engine.save_to_file(text, temp_filename)
             engine.runAndWait()
+            # Important: Re-initialize or close to release resources if needed
         
         # Check if file exists and has size
         if not os.path.exists(temp_filename) or os.path.getsize(temp_filename) == 0:
