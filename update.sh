@@ -5,25 +5,27 @@
 
 set -e
 
-# Search for the application directory
-if [ -d "$HOME/aiagent" ]; then
+# Search for the application directory in common locations
+if [ -d "$HOME/aiagent/.git" ]; then
     APP_DIR="$HOME/aiagent"
-elif [ -d "/opt/aiagent" ]; then
+elif [ -d "/root/aiagent/.git" ]; then
+    APP_DIR="/root/aiagent"
+elif [ -d "/opt/aiagent/.git" ]; then
     APP_DIR="/opt/aiagent"
 else
-    # Fallback to current directory of the script if possible
-    APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null || pwd)"
-fi
-
-if [ ! -d "$APP_DIR/.git" ]; then
-    echo "❌ Lỗi: Không tìm thấy thư mục cài đặt AI Agent có chứa Git tại $APP_DIR"
-    echo "Hãy chắc chắn bạn đã cài đặt ứng dụng vào ~/aiagent"
-    exit 1
+    # Try to find it relative to scripts if possible, or fail gracefully
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd 2>/dev/null || pwd)"
+    if [ -d "$SCRIPT_DIR/.git" ]; then
+        APP_DIR="$SCRIPT_DIR"
+    else
+        echo "❌ Lỗi: Không tìm thấy thư mục cài đặt AI Agent (có chứa .git)."
+        echo "Hãy chắc chắn bạn đã cài đặt vào ~/aiagent hoặc /root/aiagent."
+        exit 1
+    fi
 fi
 
 cd "$APP_DIR"
-
-echo "🔄 Đang cập nhật AI Agent tại $APP_DIR..."
+echo "🔄 Đang cập nhật AI Agent tại: $APP_DIR"
 
 # 1. Fetch and Reset to avoid local conflicts
 git fetch origin
@@ -50,7 +52,7 @@ if [[ "$(uname)" == "Darwin" ]]; then
     ./manage.sh restart
 elif [[ "$(uname)" == "Linux" ]]; then
     # Linux (Systemd)
-    sudo systemctl restart aiagent
+    sudo systemctl restart aiagent || ./manage.sh restart
 fi
 
 echo ""
