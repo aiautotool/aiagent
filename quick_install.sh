@@ -23,7 +23,7 @@ if [[ "$OS_TYPE" == "Darwin" ]]; then
 elif [[ "$OS_TYPE" == "Linux" ]]; then
     if [ -f /etc/debian_version ]; then
         echo "🐧 Ubuntu/Debian detected. Installing dependencies..."
-        sudo apt update && sudo apt install -y python3-pip libespeak1 ffmpeg git
+        sudo apt update && sudo apt install -y python3-pip libespeak1 ffmpeg git python3-venv
     elif [ -f /etc/redhat-release ]; then
         echo "🐧 CentOS/RHEL detected. Installing dependencies..."
         sudo yum install -y python3-pip espeak-ng ffmpeg git
@@ -49,8 +49,16 @@ chmod +x *.sh
 
 # 4. Install Python Dependencies
 echo "📦 Installing Python dependencies..."
-# Use --break-system-packages for modern Linux distros (Ubuntu 23+, Debian 12+)
-pip3 install --break-system-packages -r requirements.txt || pip3 install -r requirements.txt
+# Try to install with --break-system-packages (for PEP 668 managed environments)
+# If it fails, try without (for older environments)
+if python3 -m pip install --break-system-packages -r requirements.txt 2>/dev/null; then
+    echo "✅ Dependencies installed (with system-package override)."
+elif pip3 install --break-system-packages -r requirements.txt 2>/dev/null; then
+    echo "✅ Dependencies installed (pip3 override)."
+else
+    echo "🔄 Conventional install..."
+    pip3 install -r requirements.txt || python3 -m pip install -r requirements.txt
+fi
 
 # 5. Install Background Service
 echo "⚙️ Setting up background service..."
