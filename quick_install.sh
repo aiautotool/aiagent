@@ -65,10 +65,13 @@ fi
 echo "⚙️ Thiết lập dịch vụ chạy ngầm..."
 ./install_service.sh
 
+# 8. Get Server IP
+SERVER_IP=$(curl -s https://ifconfig.me || curl -s https://icanhazip.com || echo "localhost")
+
 echo ""
 echo "✅ Installation Complete!"
 echo "------------------------------------------------"
-echo "🌐 Web Interface: http://localhost:15005"
+echo "🌐 Web Interface: http://${SERVER_IP}:15005"
 echo "🛠️ Management: ./manage.sh {start|stop|restart|status|logs}"
 echo "🔑 Note: Edit ~/aiagent/config.json to enter your API Keys."
 echo "------------------------------------------------"
