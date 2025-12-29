@@ -29,7 +29,27 @@ elif [[ "$OS_TYPE" == "Linux" ]]; then
     sudo cp aiagent.service /etc/systemd/system/
     sudo systemctl daemon-reload
     sudo systemctl enable aiagent
-    sudo systemctl start aiagent
+    sudo systemctl restart aiagent
+    
+    # Open Port 15005 in Firewall
+    echo "🛡️ Opening port 15005 in Firewall..."
+    if command -v firewall-cmd > /dev/null; then
+        sudo firewall-cmd --permanent --add-port=15005/tcp
+        sudo firewall-cmd --reload
+        echo "✅ Port 15005 opened via firewalld."
+    fi
+    
+    if command -v iptables > /dev/null; then
+        sudo iptables -I INPUT -p tcp --dport 15005 -j ACCEPT
+        # Save iptables if possible
+        if [ -f /etc/sysconfig/iptables ]; then
+            sudo service iptables save
+        elif command -v iptables-save > /dev/null; then
+            sudo iptables-save | sudo tee /etc/iptables/rules.v4 > /dev/null
+        fi
+        echo "✅ Port 15005 opened via iptables."
+    fi
+
     echo "Service installed and started on Linux."
     echo "Use 'sudo systemctl status aiagent' to check status."
 else

@@ -26,11 +26,11 @@ Sau khi cài đặt, bạn sử dụng lệnh trong thư mục `~/aiagent` để
 ## 📖 Cách sử dụng
 
 ### 1. Giao diện Web
-Truy cập trực tiếp: `http://localhost:5005/`
+Truy cập trực tiếp: `http://localhost:15005/`
 
 ### 2. API TTS (Ví dụ cURL)
 ```bash
-curl -X POST http://localhost:5005/api/tts \
+curl -X POST http://localhost:15005/api/tts \
      -H "Content-Type: application/json" \
      -d '{"text": "Xin chào", "engine": "gtts"}'
 ```
