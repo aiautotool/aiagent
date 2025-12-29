@@ -28,7 +28,7 @@ cp config.json $CONF_DIR/
 
 # 4. Install Python Requirements
 echo "Installing Python requirements..."
-pip3 install -r $APP_DIR/requirements.txt
+pip3 install --break-system-packages -r $APP_DIR/requirements.txt || pip3 install -r $APP_DIR/requirements.txt
 
 # 5. Setup Systemd Service
 echo "Setting up systemd service..."

@@ -48,7 +48,8 @@ chmod +x *.sh
 
 # 4. Install Python Dependencies
 echo "📦 Installing Python dependencies..."
-pip3 install -r requirements.txt
+# Use --break-system-packages for modern Linux distros (Ubuntu 23+, Debian 12+)
+pip3 install --break-system-packages -r requirements.txt || pip3 install -r requirements.txt
 
 # 5. Install Background Service
 echo "⚙️ Setting up background service..."
