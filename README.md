@@ -1,10 +1,14 @@
 # AI Agent & TTS Web API
 
-Dự án này cung cấp một API mạnh mẽ để tương tác với các mô hình AI (Gemini, Pollinations, v.v.) và tích hợp tính năng Chuyển đổi văn bản thành giọng nói (TTS) đa nền tảng.
+Dự án này cung cấp một API mạnh mẽ để tương tác với các mô hình AI (Gemini, Pollinations, MiMo, v.v.) và tích hợp tính năng Chuyển đổi văn bản thành giọng nói (TTS) đa nền tảng chất lượng cao.
 
-## 🚀 Cài đặt 
+---
 
-Chạy lệnh duy nhất sau trên Terminal để tự động cài đặt toàn bộ hệ thống (Hỗ trợ **macOS, Ubuntu, CentOS**):
+## 🚀 Cài đặt nhanh (Cách duy nhất)
+
+Dùng một dòng lệnh duy nhất để tự động hóa toàn bộ quy trình: Tải mã nguồn, cài hệ thống phụ thuộc, thiết lập môi trường ảo (venv), cài đặt dịch vụ chạy ngầm và cấu hình Firewall.
+
+**Hỗ trợ**: macOS, Ubuntu (Debian), CentOS (RHEL).
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/aiautotool/aiagent/main/quick_install.sh | bash
@@ -12,47 +16,71 @@ curl -sSL https://raw.githubusercontent.com/aiautotool/aiagent/main/quick_instal
 
 ---
 
-## 🔑 Cấu hình API Key
+## 🔑 Cấu hình API Key (Bắt buộc)
 
-Để AI hoạt động, bạn cần cấu hình các API Key trong file `config.json`:
+Sau khi cài đặt, bạn **cần** nhập API Key để các mô hình AI hoạt động:
 
-1.  Sao chép file mẫu: `cp config.json.example config.json`
-2.  Mở `config.json` và thay thế các giá trị `YOUR_...` bằng key thật của bạn.
-3.  Lưu file và khởi động lại dịch vụ: `./manage.sh restart`
+1.  Di chuyển vào thư mục: `cd ~/aiagent`
+2.  Mở tệp cấu hình (đã tự động tạo từ mẫu): `nano config.json`
+3.  Thay thế các giá trị `YOUR_...` bằng Key thực tế của bạn.
+4.  Khởi động lại dịch vụ để áp dụng: `./manage.sh restart`
 
-*Lưu ý: File `config.json` đã được đưa vào `.gitignore` để tránh rò rỉ mã bảo mật.*
+> **Bảo mật**: Tệp `config.json` đã được đưa vào `.gitignore`. Bạn hoàn toàn yên tâm khi thực hiện các lệnh Git push mà không lo lộ mã bảo mật.
 
 ---
 
 ## 🛠️ Quản lý dịch vụ
 
-Sau khi cài đặt, bạn sử dụng lệnh trong thư mục `~/aiagent` để quản lý:
+Bạn có thể quản lý trạng thái của API thông qua kịch bản `manage.sh`:
 
-*   **Khởi động**: `./manage.sh start`
-*   **Dừng**: `./manage.sh stop`
-*   **Kiểm tra**: `./manage.sh status`
-*   **Xem Log**: `./manage.sh logs`
+| Lệnh | Mô tả |
+| :--- | :--- |
+| `./manage.sh start` | Khởi động dịch vụ |
+| `./manage.sh stop` | Dừng dịch vụ đang chạy |
+| `./manage.sh status` | Kiểm tra trạng thái hoạt động |
+| `./manage.sh restart` | Khởi động lại dịch vụ |
+| `./manage.sh logs` | Xem nhật ký hệ thống (Log) thời gian thực |
 
 ---
 
-## 📖 Cách sử dụng
+## 📖 Hướng dẫn sử dụng
 
-### 1. Giao diện Web
-Truy cập trực tiếp: `http://localhost:15005/`
+### 1. Giao diện Web Test
+Hệ thống tích hợp sẵn một giao diện trực quan để bạn kiểm tra tính năng TTS:
+- **Địa chỉ**: [http://localhost:15005/](http://localhost:15005/)
 
-### 2. API TTS (Ví dụ cURL)
-```bash
-curl -X POST http://localhost:15005/api/tts \
-     -H "Content-Type: application/json" \
-     -d '{"text": "Xin chào", "engine": "gtts"}'
+### 2. Các Endpoint API chính
+
+#### **Chuyển đổi Văn bản thành Giọng nói (TTS)**
+- **Endpoint**: `POST /api/tts`
+- **Body mẫu**:
+```json
+{
+  "text": "Chào mừng bạn đến với AI Agent",
+  "engine": "gtts",
+  "rate": 180,
+  "volume": 1.0
+}
+```
+- **Engine**: `native` (Giọng hệ thống - Offline) hoặc `gtts` (Google - Online).
+
+#### **Tương tác AI (Generate)**
+- **Endpoint**: `POST /api/generate`
+- **Body mẫu**:
+```json
+{
+  "prompt": "Viết một bài giới thiệu về AI",
+  "model": "gemini"
+}
 ```
 
 ---
 
-## Tính năng chính
-- **AI Generation**: Hỗ trợ nhiều mô hình AI.
-- **TTS API**: Hỗ trợ Native (Offline) và Google gTTS (Online).
-- **Base64 Output**: Trả về dữ liệu âm thanh trực tiếp để phát trên web.
-- **Tự động hóa**: Cài đặt dịch vụ chạy ngầm tự động.
+## ✨ Điểm nổi bật
+- **Môi trường biệt lập**: Tự động sử dụng `python3-venv` để tránh xung đột thư viện hệ thống.
+- **Tự động mở Port**: Tự động cấu hình `iptables` / `firewalld` (port 15005).
+- **Output Base64**: Trả về dữ liệu âm thanh dưới dạng Base64, dễ dàng tích hợp vào Website hoặc App.
+- **Đa nền tảng**: Tương thích tốt với hầu hết các bản phân phối Linux và macOS.
 
-Dự án được phát triển bởi AIAUTOTOOL.
+---
+Phát triển bởi **AIAUTOTOOL**.
