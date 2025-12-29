@@ -42,6 +42,11 @@ Bạn có thể quản lý trạng thái của API thông qua kịch bản `mana
 | `./manage.sh logs` | Xem nhật ký hệ thống (Log) thời gian thực |
 | `./update.sh` | **Cập nhật lên phiên bản mới nhất** |
 
+### 🔄 Cập nhật nhanh bằng một dòng lệnh:
+```bash
+curl -sSL https://raw.githubusercontent.com/aiautotool/aiagent/main/update.sh | bash
+```
+
 ---
 
 ## 📖 Hướng dẫn sử dụng
