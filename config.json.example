@@ -1,0 +1,11 @@
+{
+    "port": 15005,
+    "host": "0.0.0.0",
+    "debug": false,
+    "gemini_keys": [
+        "YOUR_GEMINI_KEY_1",
+        "YOUR_GEMINI_KEY_2"
+    ],
+    "mimo_key": "YOUR_MIMO_KEY",
+    "custom_gemini_key": "sk-demo"
+}

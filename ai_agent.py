@@ -6,13 +6,35 @@ import unicodedata
 import os
 
 class AIAgent:
-    GEMINI_API_KEYS = [
-        "AIzaSyBovMWTUGo5uvelS_U9slDmgSv-7o0DcQ4",
-        "AIzaSyAjZp5L2GOCNM0zs8WJwG_Ijky4HxmRuyk",
-        "AIzaSyAhPShLq1yuKIDRDpz1LyQzaQZFNB5cUAc",
-        "AIzaSyAbdVxzi79-gZtoF-BmoZHVdrTFPj9HNjE",
-        "AIzaSyAdL0fuN2kgyvViIKwtX2c0xB3iq56wScY"
-    ]
+    GEMINI_API_KEYS = []
+    MIMO_KEY = ""
+    CUSTOM_GEMINI_KEY = "sk-demo"
+
+    @classmethod
+    def load_api_keys(cls):
+        # Default keys from environment variables
+        cls.GEMINI_API_KEYS = os.getenv("GEMINI_API_KEYS", "").split(",")
+        cls.GEMINI_API_KEYS = [k.strip() for k in cls.GEMINI_API_KEYS if k.strip()]
+        cls.MIMO_KEY = os.getenv("MIMO_KEY", "")
+        cls.CUSTOM_GEMINI_KEY = os.getenv("CUSTOM_GEMINI_KEY", "sk-demo")
+
+        # Load from config.json if keys are still empty
+        config_paths = ['config.json', '/etc/aiagent/config.json']
+        for path in config_paths:
+            if os.path.exists(path):
+                try:
+                    with open(path, 'r') as f:
+                        config = json.load(f)
+                        if not cls.GEMINI_API_KEYS:
+                            keys = config.get("gemini_keys", [])
+                            cls.GEMINI_API_KEYS = [k for k in keys if "YOUR_" not in k]
+                        if not cls.MIMO_KEY:
+                            key = config.get("mimo_key", "")
+                            if "YOUR_" not in key:
+                                cls.MIMO_KEY = key
+                        if "custom_gemini_key" in config:
+                            cls.CUSTOM_GEMINI_KEY = config.get("custom_gemini_key")
+                except: pass
 
     AUTHORS = [
         {"id": 1, "name": "Nguyên Minh Tuân", "job": "Chuyên gia công nghệ"},
@@ -112,6 +134,10 @@ class AIAgent:
 
     @classmethod
     def call_ai_agent(cls, prompt, system_prompt=None, temperature=0.7, max_tokens=8000, model=None):
+        # Refresh keys if empty
+        if not cls.GEMINI_API_KEYS and not cls.MIMO_KEY:
+            cls.load_api_keys()
+
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
@@ -146,7 +172,7 @@ class AIAgent:
                 "stream": False, "temperature": temperature, "max_tokens": max_tokens
             }
             try:
-                response = requests.post(url, headers={"Content-Type": "application/json", "Authorization": "Bearer sk-demo"}, json=payload, timeout=60)
+                response = requests.post(url, headers={"Content-Type": "application/json", "Authorization": f"Bearer {cls.CUSTOM_GEMINI_KEY}"}, json=payload, timeout=60)
                 res_json = response.json()
                 if 'choices' in res_json and len(res_json['choices']) > 0:
                     return cls.strip_blog_tags(res_json['choices'][0]['message']['content'])
@@ -174,7 +200,7 @@ class AIAgent:
             print("   [AI] Đang gọi Xiaomi MiMo (mimo-v2-flash)...")
             url = "https://api.xiaomimimo.com/v1/chat/completions"
             headers = {
-                "Authorization": "Bearer sk-sifcsluc3thlsaqn8pevh2b0mdw1ca2hsvwsqofeowbnkmzk",
+                "Authorization": f"Bearer {cls.MIMO_KEY or 'sk-demo'}",
                 "Content-Type": "application/json"
             }
             payload = {
