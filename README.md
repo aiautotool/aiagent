@@ -70,14 +70,28 @@ Hệ thống tích hợp sẵn một giao diện trực quan để bạn kiểm 
 ```
 - **Engine**: `native` (Giọng hệ thống - Offline) hoặc `gtts` (Google - Online).
 
-#### **Tương tác AI (Generate)**
+#### **Tương tác AI (Text Generation)**
 - **Endpoint**: `POST /api/generate`
-- **Body mẫu**:
-```json
-{
-  "prompt": "Viết một bài giới thiệu về AI",
-  "model": "gemini"
-}
+- **Tham số chi tiết**:
+
+| Tham số | Kiểu | Mô tả |
+| :--- | :--- | :--- |
+| `prompt` | string | (Bắt buộc) Nội dung câu hỏi hoặc yêu cầu. |
+| `system_prompt` | string | Thiết lập vai trò hoặc ngữ cảnh cho AI. |
+| `model` | string | Chọn mô hình: `gemini` (mặc định), `pollinations`, `mimo`, `llm7`. |
+| `temperature` | float | Độ sáng tạo (0.0 đến 1.0, mặc định 0.7). |
+| `max_tokens` | int | Giới hạn độ dài phản hồi (mặc định 8000). |
+
+- **Ví dụ cURL**:
+```bash
+curl -X POST http://localhost:15005/api/generate \
+     -H "Content-Type: application/json" \
+     -d '{
+       "prompt": "Tại sao bầu trời màu xanh?",
+       "system_prompt": "Bạn là một nhà khoa học vui tính.",
+       "model": "gemini",
+       "temperature": 0.8
+     }'
 ```
 
 ---
