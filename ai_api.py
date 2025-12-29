@@ -67,6 +67,13 @@ def test_page():
     test_page_path = os.path.join(os.path.dirname(__file__), 'test_tts.html')
     return send_file(test_page_path)
 
+@app.route('/test_generate.html')
+def test_generate():
+    page_path = os.path.join(os.path.dirname(__file__), 'test_generate.html')
+    if os.path.exists(page_path):
+        return send_file(page_path)
+    return "File not found", 404
+
 @app.route('/api/voices', methods=['GET'])
 def get_voices():
     try:

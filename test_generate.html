@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent - Test Generate API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+        }
+
+        .result-container.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .result-text {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .success {
+            color: #155724;
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin-bottom: 15px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            color: #2196F3;
+            margin-bottom: 10px;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+        }
+
+        .examples {
+            grid-column: 1 / -1;
+        }
+
+        .example-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .example-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Agent Generate API</h1>
+            <p>Test và khám phá khả năng của AI Agent API</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>⚙️ Cấu Hình Request</h2>
+
+                <div class="info-box">
+                    <h3>📝 Hướng Dẫn</h3>
+                    <ul>
+                        <li><strong>Prompt:</strong> Câu hỏi hoặc yêu cầu (bắt buộc)</li>
+                        <li><strong>System Prompt:</strong> Vai trò của AI (tùy chọn)</li>
+                        <li><strong>Temperature:</strong> 0.0-1.0 (càng cao càng sáng tạo)</li>
+                        <li><strong>Max Tokens:</strong> Độ dài tối đa của câu trả lời</li>
+                    </ul>
+                </div>
+
+                <form id="generateForm">
+                    <div class="form-group">
+                        <label for="apiUrl">🌐 API URL:</label>
+                        <input type="text" id="apiUrl" value="http://localhost:15005/api/generate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prompt">💬 Prompt (Bắt buộc):</label>
+                        <textarea id="prompt" placeholder="Ví dụ: Viết một bài thơ về mùa xuân..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="systemPrompt">🎭 System Prompt (Tùy chọn):</label>
+                        <textarea id="systemPrompt" placeholder="Ví dụ: Bạn là một nhà thơ lãng mạn..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="model">🧠 Model:</label>
+                        <select id="model">
+                            <option value="">Mặc định</option>
+                            <option value="gemini">Gemini</option>
+                            <option value="custom-gemini">Custom Gemini</option>
+                            <option value="pollinations">Pollinations</option>
+                            <option value="mimo">Mimo</option>
+                            <option value="llm7">LLM7</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="temperature">🌡️ Temperature: <span id="tempValue">0.7</span></label>
+                            <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="maxTokens">📏 Max Tokens:</label>
+                            <input type="number" id="maxTokens" value="8000" min="100" max="32000">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" id="generateBtn">
+                        🚀 Tạo Nội Dung
+                    </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>📊 Kết Quả</h2>
+                <div id="resultContainer" class="result-container">
+                    <p style="color: #999; text-align: center; padding: 50px 20px;">
+                        Kết quả sẽ hiển thị ở đây sau khi bạn gửi request...
+                    </p>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="value" id="totalRequests">0</div>
+                        <div class="label">Requests</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="successCount">0</div>
+                        <div class="label">Thành công</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="avgTime">0s</div>
+                        <div class="label">Thời gian TB</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card examples">
+                <h2>💡 Ví Dụ Nhanh</h2>
+                <div class="example-buttons">
+                    <button class="example-btn" onclick="loadExample('poem')">📜 Viết Thơ</button>
+                    <button class="example-btn" onclick="loadExample('story')">📖 Kể Chuyện</button>
+                    <button class="example-btn" onclick="loadExample('code')">💻 Viết Code</button>
+                    <button class="example-btn" onclick="loadExample('email')">✉️ Viết Email</button>
+                    <button class="example-btn" onclick="loadExample('recipe')">🍳 Công Thức Nấu Ăn</button>
+                    <button class="example-btn" onclick="loadExample('translate')">🌍 Dịch Thuật</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Stats tracking
+        let stats = {
+            total: 0,
+            success: 0,
+            times: []
+        };
+
+        // Update temperature display
+        document.getElementById('temperature').addEventListener('input', function (e) {
+            document.getElementById('tempValue').textContent = e.target.value;
+        });
+
+        // Form submission
+        document.getElementById('generateForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const apiUrl = document.getElementById('apiUrl').value;
+            const prompt = document.getElementById('prompt').value;
+            const systemPrompt = document.getElementById('systemPrompt').value;
+            const model = document.getElementById('model').value;
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const maxTokens = parseInt(document.getElementById('maxTokens').value);
+
+            const resultContainer = document.getElementById('resultContainer');
+            const generateBtn = document.getElementById('generateBtn');
+
+            // Show loading
+            resultContainer.innerHTML = '<div class="spinner"></div>';
+            resultContainer.classList.add('loading');
+            generateBtn.disabled = true;
+            generateBtn.textContent = '⏳ Đang xử lý...';
+
+            const startTime = Date.now();
+
+            try {
+                const payload = {
+                    prompt: prompt,
+                    temperature: temperature,
+                    max_tokens: maxTokens
+                };
+
+                if (systemPrompt) payload.system_prompt = systemPrompt;
+                if (model) payload.model = model;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                const endTime = Date.now();
+                const duration = ((endTime - startTime) / 1000).toFixed(2);
+
+                resultContainer.classList.remove('loading');
+
+                if (data.success) {
+                    resultContainer.innerHTML = `
+                        <div class="success">
+                            ✅ Thành công! Thời gian: ${duration}s
+                        </div>
+                        <div class="result-text">${escapeHtml(data.result)}</div>
+                    `;
+
+                    stats.success++;
+                } else {
+                    resultContainer.innerHTML = `
+                        <div class="error">
+                            ❌ Lỗi: ${escapeHtml(data.error)}
+                        </div>
+                    `;
+                }
+
+                stats.total++;
+                stats.times.push(parseFloat(duration));
+                updateStats();
+
+            } catch (error) {
+                resultContainer.classList.remove('loading');
+                resultContainer.innerHTML = `
+                    <div class="error">
+                        ❌ Lỗi kết nối: ${escapeHtml(error.message)}
+                        <br><br>
+                        <strong>Kiểm tra:</strong>
+                        <ul>
+                            <li>API server đang chạy?</li>
+                            <li>URL đúng chưa?</li>
+                            <li>CORS được bật chưa?</li>
+                        </ul>
+                    </div>
+                `;
+
+                stats.total++;
+                updateStats();
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '🚀 Tạo Nội Dung';
+            }
+        });
+
+        function updateStats() {
+            document.getElementById('totalRequests').textContent = stats.total;
+            document.getElementById('successCount').textContent = stats.success;
+
+            if (stats.times.length > 0) {
+                const avg = stats.times.reduce((a, b) => a + b, 0) / stats.times.length;
+                document.getElementById('avgTime').textContent = avg.toFixed(2) + 's';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function loadExample(type) {
+            const examples = {
+                poem: {
+                    prompt: 'Viết một bài thơ ngắn về mùa xuân',
+                    systemPrompt: 'Bạn là một nhà thơ lãng mạn, sử dụng ngôn từ đẹp và giàu cảm xúc',
+                    temperature: 0.9
+                },
+                story: {
+                    prompt: 'Kể một câu chuyện ngắn về một chú robot học cách yêu thương',
+                    systemPrompt: 'Bạn là một nhà văn khoa học viễn tưởng, viết những câu chuyện cảm động',
+                    temperature: 0.8
+                },
+                code: {
+                    prompt: 'Viết một hàm Python để tính số Fibonacci',
+                    systemPrompt: 'Bạn là một lập trình viên Python senior, code sạch và có comment rõ ràng',
+                    temperature: 0.3
+                },
+                email: {
+                    prompt: 'Viết email cảm ơn khách hàng sau khi họ mua sản phẩm',
+                    systemPrompt: 'Bạn là một chuyên gia marketing, viết email chuyên nghiệp và thân thiện',
+                    temperature: 0.6
+                },
+                recipe: {
+                    prompt: 'Hướng dẫn nấu món phở bò',
+                    systemPrompt: 'Bạn là một đầu bếp chuyên nghiệp, hướng dẫn chi tiết và dễ hiểu',
+                    temperature: 0.5
+                },
+                translate: {
+                    prompt: 'Dịch sang tiếng Anh: "Xin chào, tôi là một trợ lý AI thông minh"',
+                    systemPrompt: 'Bạn là một phiên dịch chuyên nghiệp, dịch chính xác và tự nhiên',
+                    temperature: 0.3
+                }
+            };
+
+            const example = examples[type];
+            if (example) {
+                document.getElementById('prompt').value = example.prompt;
+                document.getElementById('systemPrompt').value = example.systemPrompt;
+                document.getElementById('temperature').value = example.temperature;
+                document.getElementById('tempValue').textContent = example.temperature;
+            }
+        }
+
+        // Load stats from localStorage
+        const savedStats = localStorage.getItem('aiAgentStats');
+        if (savedStats) {
+            stats = JSON.parse(savedStats);
+            updateStats();
+        }
+
+        // Save stats to localStorage
+        window.addEventListener('beforeunload', function () {
+            localStorage.setItem('aiAgentStats', JSON.stringify(stats));
+        });
+    </script>
+</body>
+
+</html>
