@@ -7,3 +7,11 @@
 __pycache__/
 .DS_Store
 config.json
+Antigravity-Manager-main*
+accounts.json
+gui_config.json
+logs/
+antigravity_proxy/accounts/
+antigravity_proxy/response.json
+antigravity_proxy/probe_edit_res.json
+test_image_result.md
